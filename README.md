@@ -5,6 +5,7 @@
 [![Security](https://img.shields.io/badge/Security-OAuth2-blueviolet.svg)](https://spring.io/projects/spring-security)
 [![Feign](https://img.shields.io/badge/HTTP--Client-Feign-blue.svg)](https://spring.io/projects/spring-cloud-openfeign)
 [![Docker](https://img.shields.io/badge/Docker-Compose%20Enabled-blue.svg)](https://www.docker.com/)
+[![Quality Gate Status](https://img.shields.io/badge/SonarQube-Quality%20Gate-brightgreen.svg)](https://sonarqube.org)
 
 Este microsserviço é o componente de **Gestão de Usuários** do ecossistema **Agendador de Tarefas**. Ele atua como o provedor central de dados cadastrais e autenticação, integrando-se nativamente com um **BFF (Backend for Frontend)** e consumindo serviços externos de forma resiliente.
 
@@ -68,7 +69,14 @@ O projeto já nasce "containerizado". O arquivo `docker-compose.yml` na raiz ger
 O projeto prioriza a confiabilidade através de testes automatizados:
 * **Unit Tests:** Cobertura total dos conversores e lógica de negócio.
 * **Mocking:** Isolamento total de APIs externas através de mocks do Feign Client, garantindo que os testes não dependam da internet.
+  
+---
 
+### 📊 Qualidade e Estática de Código
+Para garantir a manutenibilidade e a segurança do projeto, utilizamos o **SonarQube** na análise estática do código. 
+* **Foco em Clean Code:** Monitorização constante de duplicidade de código e dívida técnica.
+* **Segurança:** Análise automática de vulnerabilidades em bibliotecas e padrões de implementação.
+* **Complexidade:** Controlo de complexidade ciclomática para manter os métodos simples e testáveis.
 ---
 
 ## 🤝 Desenvolvedor
