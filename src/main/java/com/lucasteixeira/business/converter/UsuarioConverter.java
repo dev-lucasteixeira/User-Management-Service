@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component //ela é um compenente a mais na aplicação, mas sem regras de negócios
+@Component
 public class UsuarioConverter {
 
     public Usuario paraUsuario(UsuarioDTO usuarioDTO){
@@ -24,7 +24,7 @@ public class UsuarioConverter {
     }
 
     public List<Endereco> paraListaEndereco(List<EnderecoDTO> enderecosDTO){
-        return enderecosDTO.stream().map(this::paraEndereco).toList(); //Ela mapeia a lista e converte tudo, ai formaa outra lista no lugar com os valores que queremos
+        return enderecosDTO.stream().map(this::paraEndereco).toList();
     }
 
     public Endereco paraEndereco(EnderecoDTO enderecoDTO){
@@ -64,7 +64,7 @@ public class UsuarioConverter {
     }
 
     public List<EnderecoDTO> paraListaEnderecoDTO(List <Endereco> enderecoDTOS){
-        return enderecoDTOS.stream().map(this::paraEnderecoDTO).toList(); //Ela mapeia a lista e converte tudo, ai formaa outra lista no lugar com os valores que queremos
+        return enderecoDTOS.stream().map(this::paraEnderecoDTO).toList();
     }
 
     public EnderecoDTO paraEnderecoDTO(Endereco endereco){

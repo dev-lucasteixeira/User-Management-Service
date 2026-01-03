@@ -1,4 +1,4 @@
-package com.lucasteixeira.business;
+package com.lucasteixeira.business.services;
 
 
 import com.lucasteixeira.business.converter.UsuarioConverter;
@@ -15,6 +15,7 @@ import com.lucasteixeira.infrastructure.repository.EnderecoRepository;
 import com.lucasteixeira.infrastructure.repository.TelefoneRepository;
 import com.lucasteixeira.infrastructure.repository.UsuarioRepository;
 import com.lucasteixeira.infrastructure.security.JwtUtil;
+import com.lucasteixeira.producers.UserProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -36,6 +37,7 @@ public class UsuarioService {
     private final EnderecoRepository enderecoRepository;
     private final TelefoneRepository telefoneRepository;
     private final AuthenticationManager authenticationManager;
+    private final UserProducer userProducer;
 
 
     public UsuarioDTO salvaUsuario(UsuarioDTO usuarioDTO){
@@ -43,6 +45,7 @@ public class UsuarioService {
         usuarioDTO.setSenha(passwordEncoder.encode(usuarioDTO.getSenha()));
         Usuario usuario = usuarioConverter.paraUsuario(usuarioDTO);
         usuario = usuarioRepository.save(usuario);
+        userProducer.publishMessageEmail(usuario);
         return usuarioConverter.paraUsuarioDTO(usuario);
     }
 
