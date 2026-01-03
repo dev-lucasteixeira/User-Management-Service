@@ -5,8 +5,8 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,19 +18,25 @@ class UsuarioRepositoryTest {
     @Mock
     EntityManager entityManager;
 
-    @Mock
+    @Autowired
     UsuarioRepository usuarioRepository;
 
     @Test
     @DisplayName("Should get User from DB when user exists")
     void existsByEmail() {
+        // ARRANGE
+        String email = "existe@teste.com";
+        Usuario usuario = new Usuario();
+        usuario.setEmail(email);
+        usuario.setNome("Lucas");
+        usuario.setSenha("1234");
+        usuarioRepository.save(usuario); // <--- SALVE ANTES
 
-        String email = "teste@teste.com";
-        createUser(email);
+        // ACT
+        boolean exists = usuarioRepository.existsByEmail(email);
 
-        boolean result = usuarioRepository.existsByEmail(email);
-
-        assertThat(result).isTrue();
+        // ASSERT
+        assertThat(exists).isTrue(); // Agora não falha na linha 33
     }
 
     @Test
@@ -46,14 +52,21 @@ class UsuarioRepositoryTest {
 
     @Test
     @DisplayName("Should get User successfully from DB")
-    @WithMockUser(username = "teste@teste.com")
     void findByEmail() {
+        // 1. Arrange - Crie o objeto completo
         String email = "teste@teste.com";
-        createUser(email);
+        Usuario usuario = new Usuario();
+        usuario.setNome("Lucas");
+        usuario.setEmail(email);
+        usuario.setSenha("1234");
 
+        // 2. Act - Salve e GARANTA que o ID foi gerado
+        usuarioRepository.save(usuario);
+
+        // 3. Assert - Busque pelo email
         var result = usuarioRepository.findByEmail(email);
 
-        assertThat(result.isPresent()).isTrue();
+        assertThat(result.isPresent()).isTrue(); // Linha 58
         assertThat(result.get().getEmail()).isEqualTo(email);
     }
 
@@ -73,16 +86,19 @@ class UsuarioRepositoryTest {
 
     @Test
     @DisplayName("Should delete User Unsuccessful from DB")
-    void deleteByEmailUnsuccessful() {
+    void deleteByEmailSuccess() {
+        // ARRANGE
+        String email = "deletar@teste.com";
+        Usuario usuario = new Usuario();
+        usuario.setEmail(email);
+        usuarioRepository.save(usuario);
 
-        String email = "teste@teste.com";
-        createUser(email);
-
-        usuarioRepository.deleteByEmail("teste1@teste.com");
-
+        // ACT
+        usuarioRepository.deleteByEmail(email);
         var result = usuarioRepository.findByEmail(email);
 
-        assertThat(result.isPresent()).isTrue();
+        // ASSERT
+        assertThat(result.isEmpty()).isTrue(); // Verifica se sumiu
     }
 
     private Usuario createUser(String email) {

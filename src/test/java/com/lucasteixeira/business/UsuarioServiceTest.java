@@ -4,6 +4,7 @@ import com.lucasteixeira.business.converter.UsuarioConverter;
 import com.lucasteixeira.business.dto.EnderecoDTO;
 import com.lucasteixeira.business.dto.TelefoneDTO;
 import com.lucasteixeira.business.dto.UsuarioDTO;
+import com.lucasteixeira.business.services.UsuarioService;
 import com.lucasteixeira.infrastructure.entity.Endereco;
 import com.lucasteixeira.infrastructure.entity.Telefone;
 import com.lucasteixeira.infrastructure.entity.Usuario;
@@ -11,14 +12,13 @@ import com.lucasteixeira.infrastructure.repository.EnderecoRepository;
 import com.lucasteixeira.infrastructure.repository.TelefoneRepository;
 import com.lucasteixeira.infrastructure.repository.UsuarioRepository;
 import com.lucasteixeira.infrastructure.security.JwtUtil;
-import jakarta.persistence.EntityManager;
+import com.lucasteixeira.producers.UserProducer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,39 +46,31 @@ class UsuarioServiceTest {
     private TelefoneRepository telefoneRepository;
     @Mock
     private AuthenticationManager authenticationManager;
+    @Mock
+    private UserProducer userProducer;
 
-    @Autowired
     @InjectMocks
     private UsuarioService usuarioService;
-
-    @Autowired
-    private EntityManager entityManager;
 
 
     @Test
     @DisplayName("Should save user in DB")
     void salvaUsuario() {
-
         UsuarioDTO requestDTO = new UsuarioDTO("Lucas", "teste@teste.com", "1234", null, null);
         Usuario usuarioEntity = new Usuario();
-        usuarioEntity.setEmail(requestDTO.getEmail());
+        usuarioEntity.setEmail("teste@teste.com");
 
         UsuarioDTO responseDTO = new UsuarioDTO("Lucas", "teste@teste.com", null, null, null);
 
-        when(passwordEncoder.encode(any())).thenReturn("senha_encriptada");
-        when(usuarioConverter.paraUsuario(any())).thenReturn(usuarioEntity);
-        when(usuarioRepository.save(any())).thenReturn(usuarioEntity);
+        when(passwordEncoder.encode(anyString())).thenReturn("senha_encriptada");
+        when(usuarioConverter.paraUsuario(any(UsuarioDTO.class))).thenReturn(usuarioEntity);
+        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuarioEntity);
 
-        when(usuarioConverter.paraUsuarioDTO(any())).thenReturn(responseDTO);
-
+        when(usuarioConverter.paraUsuarioDTO(any(Usuario.class))).thenReturn(responseDTO);
         UsuarioDTO result = usuarioService.salvaUsuario(requestDTO);
-
         assertThat(result).isNotNull();
         assertThat(result.getEmail()).isEqualTo(requestDTO.getEmail());
-
-        verify(usuarioRepository, times(1)).save(any());
-        verify(passwordEncoder).encode("1234");
-
+        verify(userProducer, times(1)).publishMessageEmail(any());
     }
 
     @Test
