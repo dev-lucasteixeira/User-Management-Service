@@ -12,14 +12,12 @@ import com.lucasteixeira.infrastructure.repository.EnderecoRepository;
 import com.lucasteixeira.infrastructure.repository.TelefoneRepository;
 import com.lucasteixeira.infrastructure.repository.UsuarioRepository;
 import com.lucasteixeira.infrastructure.security.JwtUtil;
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -48,12 +46,8 @@ class UsuarioServiceTest {
     @Mock
     private AuthenticationManager authenticationManager;
 
-    @Autowired
     @InjectMocks
     private UsuarioService usuarioService;
-
-    @Autowired
-    private EntityManager entityManager;
 
 
     @Test
