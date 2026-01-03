@@ -1,4 +1,4 @@
-package com.lucasteixeira.business;
+package com.lucasteixeira.business.services;
 
 import com.lucasteixeira.infrastructure.client.ViaCepClient;
 import com.lucasteixeira.business.dto.ViaCepDTO;

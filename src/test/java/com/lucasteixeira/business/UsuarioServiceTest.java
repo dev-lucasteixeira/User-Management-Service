@@ -4,6 +4,7 @@ import com.lucasteixeira.business.converter.UsuarioConverter;
 import com.lucasteixeira.business.dto.EnderecoDTO;
 import com.lucasteixeira.business.dto.TelefoneDTO;
 import com.lucasteixeira.business.dto.UsuarioDTO;
+import com.lucasteixeira.business.services.UsuarioService;
 import com.lucasteixeira.infrastructure.entity.Endereco;
 import com.lucasteixeira.infrastructure.entity.Telefone;
 import com.lucasteixeira.infrastructure.entity.Usuario;
