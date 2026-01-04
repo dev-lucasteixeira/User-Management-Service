@@ -141,6 +141,7 @@ class UsuarioServiceTest {
     @DisplayName("Should update the Adress's data of User")
     void atualizaEndereco() {
 
+        String email = "teste@teste.com";
         Long idEndereco = 1L;
         EnderecoDTO requestDTO = new EnderecoDTO();
         requestDTO.setRua("Rua Teste");
@@ -163,7 +164,7 @@ class UsuarioServiceTest {
         when(enderecoRepository.save(any())).thenReturn(enderecoAtualizado);
         when(usuarioConverter.paraEnderecoDTO(any())).thenReturn(requestDTO);
 
-        EnderecoDTO result = usuarioService.atualizaEndereco(idEndereco, requestDTO);
+        EnderecoDTO result = usuarioService.atualizaEndereco(idEndereco, requestDTO, email);
 
         assertThat(result).isNotNull();
         assertThat(result.getRua()).isEqualTo(requestDTO.getRua());
@@ -176,6 +177,7 @@ class UsuarioServiceTest {
     @Test
     @DisplayName("Should update the phone's data of User")
     void atualizaTelefone() {
+        String email = "teste@teste.com";
         Long idTelefone = 1L;
         TelefoneDTO requestDTO = new TelefoneDTO();
         requestDTO.setNumero("123456789");
@@ -196,7 +198,7 @@ class UsuarioServiceTest {
         when(telefoneRepository.save(any())).thenReturn(telefoneAtualizado);
         when(usuarioConverter.paraTelefoneDTO(any())).thenReturn(requestDTO);
 
-        TelefoneDTO result = usuarioService.atualizaTelefone(idTelefone, requestDTO);
+        TelefoneDTO result = usuarioService.atualizaTelefone(idTelefone, requestDTO, email);
 
         assertThat(result).isNotNull();
         assertThat(result.getNumero()).isEqualTo(requestDTO.getNumero());
