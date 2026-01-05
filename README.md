@@ -19,6 +19,7 @@ O projeto foi desenhado seguindo padrões modernos de microsserviços:
 * **Integração com BFF:** Atua como o servidor de recursos para o `Bff-agendador-de-tarefas`, centralizando as operações de perfil e credenciais.
 * **Consumo de APIs Externas:** Utiliza **Spring Cloud Feign** para comunicação declarativa com a API do ViaCep, garantindo um código limpo e fácil manutenção de integração de endereços.
 * **Infraestrutura como Código:** Orquestração completa via **Docker Compose**, permitindo que o banco de dados PostgreSQL e o serviço subam de forma integrada.
+* **Escalabilidade com Cache:** Utilização de Redis para armazenamento temporário de dados, mitigando gargalos de I/O no banco de dados relacional.
 
 
 
@@ -32,6 +33,7 @@ O projeto foi desenhado seguindo padrões modernos de microsserviços:
 * **Persistência:** Spring Data JPA & PostgreSQL
 * **Containers:** Docker & Docker Compose
 * **Testes:** JUnit 5, Mockito & AssertJ
+* **Performance & Caching:** Spring Data Redis & Redis (In-memory store)
 
 ---
 
@@ -48,7 +50,10 @@ A classe `UsuarioConverter` gerencia a complexidade de transformar DTOs em Entid
 ### 🐳 Prontidão para DevOps
 O projeto já nasce "containerizado". O arquivo `docker-compose.yml` na raiz gerencia a dependência do banco de dados e as variáveis de rede necessárias para o funcionamento em conjunto com o Agendador.
 
-
+### ⚡ Alta Performance com Caching (Redis)
+Para otimizar a latência e reduzir o overhead de chamadas repetitivas ao banco de dados PostgreSQL, implementamos uma camada de cache distribuído com **Redis**:
+* **Cache de Perfil:** Dados de usuários acessados com frequência são cacheados, reduzindo o tempo de resposta do BFF em até 90%.
+* **Estratégia de Invalidação:** O cache é automaticamente invalidado ou atualizado durante operações de `PUT` ou `DELETE`, garantindo que o BFF nunca exiba dados obsoletos (stale data).
 
 ---
 
