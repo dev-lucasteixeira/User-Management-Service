@@ -18,19 +18,15 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // Instâncias de JwtUtil e UserDetailsService injetadas pelo Spring
-    //private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
     public static final String SECURITY_SCHEME = "bearerAuth";
 
     // Construtor para injeção de dependências de JwtUtil e UserDetailsService
     @Autowired
-    public SecurityConfig(/*JwtUtil jwtUtil,*/ UserDetailsService userDetailsService) {
-        //this.jwtUtil = jwtUtil;
+    public SecurityConfig(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
-    // Configuração do filtro de segurança
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -38,27 +34,20 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/usuario").permitAll()
                         .requestMatchers(HttpMethod.GET, "/usuarios").permitAll()
-                        .requestMatchers("/usuario/endereco/**").permitAll() // CEP continua aberto
-                        .anyRequest().authenticated() // Outros exigem o token para preencher o Principal
+                        .requestMatchers("/usuario/endereco/**").permitAll()
+                        .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())); // Adiciona o filtro JWT antes do filtro de autenticação padrão
-
-        // Retorna a configuração do filtro de segurança construída
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
         return http.build();
     }
 
-    // Configura o PasswordEncoder para criptografar senhas usando BCrypt
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-
-
-    // Configura o AuthenticationManager usando AuthenticationConfiguration
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        // Obtém e retorna o AuthenticationManager da configuração de autenticação
         return authenticationConfiguration.getAuthenticationManager();
     }
 

@@ -24,7 +24,6 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +38,6 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final EnderecoRepository enderecoRepository;
     private final TelefoneRepository telefoneRepository;
-    private final AuthenticationManager authenticationManager;
     private final UserProducer userProducer;
 
 
@@ -48,9 +46,9 @@ public class UsuarioService {
         Keycloak keycloak = KeycloakBuilder.builder()
                 .serverUrl("http://localhost:8085")
                 .realm("task-scheduler") // Seu realm
-                .grantType(OAuth2Constants.CLIENT_CREDENTIALS) // Recomendado para serviço-a-serviço
+                .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
                 .clientId("task-scheduler-client")
-                .clientSecret("sayD7JaC4ycNqNm7MB7LBuQFwSU8cPri") // Pegue na aba Credentials do Client
+                .clientSecret("sayD7JaC4ycNqNm7MB7LBuQFwSU8cPri")
                 .build();
 
         UserRepresentation user = new UserRepresentation();
@@ -65,7 +63,7 @@ public class UsuarioService {
         CredentialRepresentation passwordCred = new CredentialRepresentation();
         passwordCred.setTemporary(false);
         passwordCred.setType(CredentialRepresentation.PASSWORD);
-        passwordCred.setValue(usuarioDTO.getSenha()); // Senha que veio do Postman
+        passwordCred.setValue(usuarioDTO.getSenha());
         user.setCredentials(Collections.singletonList(passwordCred));
 
         usuarioDTO.setSenha(passwordEncoder.encode(usuarioDTO.getSenha()));
@@ -82,20 +80,6 @@ public class UsuarioService {
         }
         return usuarioConverter.paraUsuarioDTO(usuario);
     }
-
-    /*public String autenticarUsuario(UsuarioDTO usuarioDTO) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(usuarioDTO.getEmail(),
-                            usuarioDTO.getSenha())
-            );
-            return "Bearer " + jwtUtil.generateToken(authentication.getName());
-
-        } catch (BadCredentialsException | UsernameNotFoundException | AuthorizationDeniedException e) {
-            throw new UnauhthorizedException("Usuário ou senha inválidos: ", e.getCause());
-        }
-    }*/
-
 
     public void emailExiste(String email){
         if (verificaEmailExistente(email)) {
@@ -143,7 +127,6 @@ public class UsuarioService {
 
     @CacheEvict(value = "users", key = "#email")
     public EnderecoDTO atualizaEndereco(Long idEndereco, EnderecoDTO enderecoDTO, String email){
-        // 1. Busca o endereço existente no banco
         Endereco entity = enderecoRepository.findById(idEndereco).orElseThrow(() ->
                 new ResourceNotFoundException("Id não encontrado " + idEndereco));
         Endereco endereco = usuarioConverter.updateEndereco(enderecoDTO, entity);
