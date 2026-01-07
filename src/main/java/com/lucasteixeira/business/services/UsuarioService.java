@@ -5,6 +5,7 @@ import com.lucasteixeira.business.converter.UsuarioConverter;
 import com.lucasteixeira.business.dto.EnderecoDTO;
 import com.lucasteixeira.business.dto.TelefoneDTO;
 import com.lucasteixeira.business.dto.UsuarioDTO;
+import com.lucasteixeira.configs.KeycloakConfig;
 import com.lucasteixeira.infrastructure.entity.Endereco;
 import com.lucasteixeira.infrastructure.entity.Telefone;
 import com.lucasteixeira.infrastructure.entity.Usuario;
@@ -39,16 +40,18 @@ public class UsuarioService {
     private final EnderecoRepository enderecoRepository;
     private final TelefoneRepository telefoneRepository;
     private final UserProducer userProducer;
+    private final KeycloakConfig keycloakConfig;
+
 
 
     public UsuarioDTO salvaUsuario(UsuarioDTO usuarioDTO){
         emailExiste(usuarioDTO.getEmail());
         Keycloak keycloak = KeycloakBuilder.builder()
-                .serverUrl("http://localhost:8085")
-                .realm("task-scheduler") // Seu realm
+                .serverUrl(keycloakConfig.getAuthServerUrl())
+                .realm(keycloakConfig.getRealm())
                 .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
-                .clientId("task-scheduler-client")
-                .clientSecret("sayD7JaC4ycNqNm7MB7LBuQFwSU8cPri")
+                .clientId(keycloakConfig.getClientId())
+                .clientSecret(keycloakConfig.getClientSecret())
                 .build();
 
         UserRepresentation user = new UserRepresentation();
