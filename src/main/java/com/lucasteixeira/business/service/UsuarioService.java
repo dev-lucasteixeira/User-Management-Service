@@ -1,7 +1,7 @@
-package com.lucasteixeira.business;
+package com.lucasteixeira.business.service;
 
 
-import com.lucasteixeira.business.converter.UsuarioConverter;
+import com.lucasteixeira.business.mappers.UsuarioMapper;
 import com.lucasteixeira.business.dto.EnderecoDTO;
 import com.lucasteixeira.business.dto.TelefoneDTO;
 import com.lucasteixeira.business.dto.UsuarioDTO;
@@ -15,6 +15,7 @@ import com.lucasteixeira.infrastructure.repository.EnderecoRepository;
 import com.lucasteixeira.infrastructure.repository.TelefoneRepository;
 import com.lucasteixeira.infrastructure.repository.UsuarioRepository;
 import com.lucasteixeira.infrastructure.security.JwtUtil;
+import com.lucasteixeira.producers.UserProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -30,20 +31,22 @@ import org.springframework.stereotype.Service;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
-    private final UsuarioConverter usuarioConverter;
+    private final UsuarioMapper usuarioMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final EnderecoRepository enderecoRepository;
     private final TelefoneRepository telefoneRepository;
     private final AuthenticationManager authenticationManager;
+    private final UserProducer userProducer;
 
 
     public UsuarioDTO salvaUsuario(UsuarioDTO usuarioDTO){
         emailExiste(usuarioDTO.getEmail());
         usuarioDTO.setSenha(passwordEncoder.encode(usuarioDTO.getSenha()));
-        Usuario usuario = usuarioConverter.paraUsuario(usuarioDTO);
+        Usuario usuario = usuarioMapper.paraUsuario(usuarioDTO);
         usuario = usuarioRepository.save(usuario);
-        return usuarioConverter.paraUsuarioDTO(usuario);
+        userProducer.publishMessageUsuarioCadastro(usuarioDTO.getEmail(), usuario);
+        return usuarioMapper.paraUsuarioDTO(usuario);
     }
 
     public String autenticarUsuario(UsuarioDTO usuarioDTO) {
@@ -60,14 +63,10 @@ public class UsuarioService {
     }
 
     public void emailExiste(String email){
-        try{
-            boolean existe = verificaEmailExistente(email);
-            if(existe){
-                throw new ConflictException("Email já cadastrado" + email);
-            }
-        }catch (ConflictException e ){
-            throw new ConflictException("Email já cadrastado" + e.getCause());
+        if(verificaEmailExistente(email)){
+            throw new ConflictException("Email já cadastrado: " + email);
         }
+
     }
 
     //Ele chama o método la na repository
@@ -78,7 +77,7 @@ public class UsuarioService {
 
     public UsuarioDTO buscUsuarioPorEmail(String email){
         try {
-            return usuarioConverter.paraUsuarioDTO(
+            return usuarioMapper.paraUsuarioDTO(
                     usuarioRepository.findByEmail(email)
                             .orElseThrow(
                     () -> new ResourceNotFoundException("Email não encontrado" + email)
@@ -104,11 +103,11 @@ public class UsuarioService {
                 new ResourceNotFoundException("Email não encontrado" + email));
 
         //mesclou os dados que recebemos na requisição com os dados do banco de dados
-        Usuario usuario = usuarioConverter.updateUsuario(dto, usuarioEntity);
+        usuarioMapper.updateUsuario(dto, usuarioEntity);
 
 
         //salvou os dados do usuario convertidos e depois pegoui o retorno e converteu para usuarioDTO
-        return usuarioConverter.paraUsuarioDTO(usuarioRepository.save(usuario));
+        return usuarioMapper.paraUsuarioDTO(usuarioRepository.save(usuarioEntity));
     }
 
     public EnderecoDTO atualizaEndereco(Long idEndereco, EnderecoDTO enderecoDTO){
@@ -116,11 +115,11 @@ public class UsuarioService {
         Endereco entity = enderecoRepository.findById(idEndereco).orElseThrow(() ->
                 new ResourceNotFoundException("Id não encontrado" + idEndereco));
 
-        Endereco endereco = usuarioConverter.updateEndereco(enderecoDTO, entity );
+        usuarioMapper.updateEndereco(enderecoDTO, entity );
 
 
 
-        return usuarioConverter.paraEnderecoDTO(enderecoRepository.save(endereco));
+        return usuarioMapper.paraEnderecoDTO(enderecoRepository.save(entity));
     }
 
     public TelefoneDTO atualizaTelefone(Long idTelefone, TelefoneDTO dto){
@@ -128,9 +127,9 @@ public class UsuarioService {
         Telefone entity = telefoneRepository.findById(idTelefone).orElseThrow(() ->
                 new ResourceNotFoundException("Id não encontrado" + idTelefone));
 
-        Telefone telefone = usuarioConverter.updateTelefone(dto, entity );
+        usuarioMapper.updateTelefone(dto, entity );
 
-        return usuarioConverter.paraTelefoneDTO(telefoneRepository.save(telefone));
+        return usuarioMapper.paraTelefoneDTO(telefoneRepository.save(entity));
     }
 
     public EnderecoDTO cadastraEndereco(String token, EnderecoDTO dto){
@@ -138,9 +137,9 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() ->
                 new ResourceNotFoundException("Email não encontrado" + email));
 
-        Endereco endereco = usuarioConverter.paraEnderecoEntity(dto, usuario.getId());
+        Endereco endereco = usuarioMapper.paraEnderecoEntity(dto, usuario.getId());
         Endereco enderecoEntity = enderecoRepository.save(endereco);
-        return usuarioConverter.paraEnderecoDTO(enderecoEntity);
+        return usuarioMapper.paraEnderecoDTO(enderecoEntity);
     }
 
     public TelefoneDTO cadastraTelefone(String token, TelefoneDTO dto){
@@ -148,8 +147,8 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() ->
                 new ResourceNotFoundException("Email não encontrado" + email));
 
-        Telefone telefone = usuarioConverter.paraTelefoneEntity(dto, usuario.getId());
+        Telefone telefone = usuarioMapper.paraTelefoneEntity(dto, usuario.getId());
         Telefone enderecoEntity = telefoneRepository.save(telefone);
-        return usuarioConverter.paraTelefoneDTO(enderecoEntity);
+        return usuarioMapper.paraTelefoneDTO(enderecoEntity);
     }
 }

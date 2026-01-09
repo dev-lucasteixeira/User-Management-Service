@@ -1,7 +1,7 @@
 package com.lucasteixeira.controller;
 
-import com.lucasteixeira.business.UsuarioService;
-import com.lucasteixeira.business.ViaCepService;
+import com.lucasteixeira.business.service.UsuarioService;
+import com.lucasteixeira.business.service.ViaCepService;
 import com.lucasteixeira.business.dto.EnderecoDTO;
 import com.lucasteixeira.business.dto.TelefoneDTO;
 import com.lucasteixeira.business.dto.UsuarioDTO;
