@@ -17,16 +17,16 @@ public class UserProducer {
     private String routingKey;
 
     public void publishMessageUsuarioCadastro(String email, Usuario usuario) {
-        var emailDTO = new EmailDTO();
-        emailDTO.setEmailTo(email);
-
-        emailDTO.setSubject("Bem-vindo ao Task Manager! 🚀");
-
-        emailDTO.setText("Olá, " + usuario.getNome() + "!\n\n" +
+        var emailDTO = EmailDTO.builder()
+                .userId(usuario.getId())
+                .emailTo(email)
+                .subject("Bem-vindo ao Task Manager! 🚀")
+                .text("Olá, " + usuario.getNome() + "!\n\n" +
                 "É um prazer ter você conosco! Seu cadastro foi realizado com sucesso.\n\n" +
                 "Agora você tem acesso a uma ferramenta poderosa para organizar sua rotina.\n\n" +
                 "Bom trabalho,\n" +
-                "Equipe Task Manager");
+                "Equipe Task Manager")
+                .build();
 
         rabbitTemplate.convertAndSend("", routingKey, emailDTO);
     }
