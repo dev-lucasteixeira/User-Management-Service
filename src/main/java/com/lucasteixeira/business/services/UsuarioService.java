@@ -1,4 +1,4 @@
-package com.lucasteixeira.business.service;
+package com.lucasteixeira.business.services;
 
 
 import com.lucasteixeira.business.mappers.UsuarioMapper;
@@ -17,6 +17,9 @@ import com.lucasteixeira.infrastructure.repository.UsuarioRepository;
 import com.lucasteixeira.infrastructure.security.JwtUtil;
 import com.lucasteixeira.producers.UserProducer;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -45,7 +48,7 @@ public class UsuarioService {
         usuarioDTO.setSenha(passwordEncoder.encode(usuarioDTO.getSenha()));
         Usuario usuario = usuarioMapper.paraUsuario(usuarioDTO);
         usuario = usuarioRepository.save(usuario);
-        userProducer.publishMessageUsuarioCadastro(usuarioDTO.getEmail(), usuario);
+        userProducer.publishMessageEmail(usuario);
         return usuarioMapper.paraUsuarioDTO(usuario);
     }
 
@@ -62,6 +65,7 @@ public class UsuarioService {
         }
     }
 
+
     public void emailExiste(String email){
         if(verificaEmailExistente(email)){
             throw new ConflictException("Email já cadastrado: " + email);
@@ -69,13 +73,15 @@ public class UsuarioService {
 
     }
 
+
     //Ele chama o método la na repository
     public boolean verificaEmailExistente(String email){
         return usuarioRepository.existsByEmail(email);
     }
 
 
-    public UsuarioDTO buscUsuarioPorEmail(String email){
+    @Cacheable(value = "users", key = "#email")
+    public UsuarioDTO buscaUsuarioPorEmail(String email){
         try {
             return usuarioMapper.paraUsuarioDTO(
                     usuarioRepository.findByEmail(email)
@@ -88,13 +94,15 @@ public class UsuarioService {
         }
     }
 
+    @CacheEvict(value = "users", key = "#email")
     public void deletaUsuarioPorEmail(String email){
         usuarioRepository.deleteByEmail(email);
     }
 
-    public UsuarioDTO atualizaUsuario(String token, UsuarioDTO dto){
+    @CachePut(value = "users", key = "#email")
+    public UsuarioDTO atualizaUsuario(String email, UsuarioDTO dto){
         //busca o usuario pelo token para tirar a obrigatoriaedade do email
-        String email = jwtUtil.extractEmailToken(token.substring(7));
+
 
         dto.setSenha(dto.getSenha() != null ? passwordEncoder.encode(dto.getSenha()) : null);
 
@@ -110,30 +118,26 @@ public class UsuarioService {
         return usuarioMapper.paraUsuarioDTO(usuarioRepository.save(usuarioEntity));
     }
 
-    public EnderecoDTO atualizaEndereco(Long idEndereco, EnderecoDTO enderecoDTO){
-
+    @CacheEvict(value = "users", key = "#email")
+    public EnderecoDTO atualizaEndereco(Long idEndereco, EnderecoDTO enderecoDTO, String email){
+        // 1. Busca o endereço existente no banco
         Endereco entity = enderecoRepository.findById(idEndereco).orElseThrow(() ->
                 new ResourceNotFoundException("Id não encontrado" + idEndereco));
-
         usuarioMapper.updateEndereco(enderecoDTO, entity );
-
-
-
         return usuarioMapper.paraEnderecoDTO(enderecoRepository.save(entity));
     }
 
-    public TelefoneDTO atualizaTelefone(Long idTelefone, TelefoneDTO dto){
-
+    @CacheEvict(value = "users", key = "#email")
+    public TelefoneDTO atualizaTelefone(Long idTelefone, TelefoneDTO dto, String email) {
         Telefone entity = telefoneRepository.findById(idTelefone).orElseThrow(() ->
-                new ResourceNotFoundException("Id não encontrado" + idTelefone));
-
+                new ResourceNotFoundException("Id não encontrado " + idTelefone));
         usuarioMapper.updateTelefone(dto, entity );
 
         return usuarioMapper.paraTelefoneDTO(telefoneRepository.save(entity));
     }
 
-    public EnderecoDTO cadastraEndereco(String token, EnderecoDTO dto){
-        String email = jwtUtil.extractEmailToken(token.substring(7));
+    @CacheEvict(value = "users", key = "#email")
+    public EnderecoDTO cadastraEndereco(String email, EnderecoDTO dto){
         Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() ->
                 new ResourceNotFoundException("Email não encontrado" + email));
 
@@ -142,8 +146,8 @@ public class UsuarioService {
         return usuarioMapper.paraEnderecoDTO(enderecoEntity);
     }
 
-    public TelefoneDTO cadastraTelefone(String token, TelefoneDTO dto){
-        String email = jwtUtil.extractEmailToken(token.substring(7));
+    @CacheEvict(value = "users", key = "#email")
+    public TelefoneDTO cadastraTelefone(String email, TelefoneDTO dto){
         Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() ->
                 new ResourceNotFoundException("Email não encontrado" + email));
 

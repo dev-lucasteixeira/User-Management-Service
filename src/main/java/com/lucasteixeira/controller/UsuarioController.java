@@ -1,7 +1,7 @@
 package com.lucasteixeira.controller;
 
-import com.lucasteixeira.business.service.UsuarioService;
-import com.lucasteixeira.business.service.ViaCepService;
+import com.lucasteixeira.business.services.UsuarioService;
+import com.lucasteixeira.business.services.ViaCepService;
 import com.lucasteixeira.business.dto.EnderecoDTO;
 import com.lucasteixeira.business.dto.TelefoneDTO;
 import com.lucasteixeira.business.dto.UsuarioDTO;
@@ -39,7 +39,7 @@ public class UsuarioController {
 
     @GetMapping
     public ResponseEntity<UsuarioDTO> buscaUsuarioPorEmail(@RequestParam("email") String email){
-        return ResponseEntity.ok(usuarioService.buscUsuarioPorEmail(email));
+        return ResponseEntity.ok(usuarioService.buscaUsuarioPorEmail(email));
     }
 
 
@@ -53,31 +53,43 @@ public class UsuarioController {
     @PutMapping
     public ResponseEntity<UsuarioDTO> atualizaDadosUsuario(@RequestBody UsuarioDTO dto,
                                                            @RequestHeader("Authorization") String token){
-        return ResponseEntity.ok(usuarioService.atualizaUsuario(token, dto));
+
+        String email = jwtUtil.extractEmailToken(token.substring(7));
+        return ResponseEntity.ok(usuarioService.atualizaUsuario(email, dto));
     }
 
     @PutMapping("/endereco")
     public ResponseEntity<EnderecoDTO> atualizaEndereco(@RequestBody EnderecoDTO dto,
-                                                        @RequestParam("id") Long id){
-        return ResponseEntity.ok(usuarioService.atualizaEndereco(id, dto));
+                                                        @RequestParam("id") Long id,
+                                                        @RequestHeader("Authorization") String token){
+
+        String email = jwtUtil.extractEmailToken(token.substring(7));
+        return ResponseEntity.ok(usuarioService.atualizaEndereco(id, dto, email));
     }
 
     @PutMapping("/telefone")
     public ResponseEntity<TelefoneDTO> atualizaTelefone(@RequestBody TelefoneDTO dto,
-                                                        @RequestParam("id") Long id){
-        return ResponseEntity.ok(usuarioService.atualizaTelefone(id, dto));
+                                                        @RequestParam("id") Long id,
+                                                        @RequestHeader("Authorization") String token){
+
+        String email = jwtUtil.extractEmailToken(token.substring(7));
+        return ResponseEntity.ok(usuarioService.atualizaTelefone(id, dto, email));
     }
 
     @PostMapping("/endereco")
     public ResponseEntity<EnderecoDTO> cadastraEndereco(@RequestBody EnderecoDTO dto,
                                                         @RequestHeader("Authorization") String token){
-        return ResponseEntity.ok(usuarioService.cadastraEndereco(token, dto));
+
+        String email = jwtUtil.extractEmailToken(token.substring(7));
+        return ResponseEntity.ok(usuarioService.cadastraEndereco(email, dto));
     }
 
     @PostMapping("/telefone")
     public ResponseEntity<TelefoneDTO> cadastraTelefone(@RequestBody TelefoneDTO dto,
                                                         @RequestHeader("Authorization") String token){
-        return ResponseEntity.ok(usuarioService.cadastraTelefone(token, dto));
+
+        String email = jwtUtil.extractEmailToken(token.substring(7));
+        return ResponseEntity.ok(usuarioService.cadastraTelefone(email, dto));
     }
 
     @GetMapping("/endereco/{cep}")
