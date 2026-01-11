@@ -20,3 +20,19 @@ services:
       POSTGRES_PASSWORD: 1234
     ports:
       - "5432:5432"
+
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17
+    container_name: jenkins
+    restart: unless-stopped
+    user: root
+    privileged: true
+    ports:
+      - "8089:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  jenkins_home:
