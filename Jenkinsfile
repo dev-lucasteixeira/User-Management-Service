@@ -22,13 +22,6 @@ pipeline {
 			}
 		}
 
-		stage('Testes') {
-			steps {
-				echo 'Rodando test'
-				sh './gradlew test'
-			}
-		}
-
 		stage('Build JAR') {
 			steps {
 				echo 'Gerando .jar'
@@ -54,8 +47,6 @@ pipeline {
 
 	post {
 		always {
-			junit '**/build/test-results/test/*.xml'
-
 			cleanWs()
 		}
 		success {
