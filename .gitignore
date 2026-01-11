@@ -18,7 +18,6 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
-.idea
 *.iws
 *.iml
 *.ipr
@@ -37,3 +36,13 @@ out/
 .vscode/
 
 **/src/main/resources/application.properties
+
+*.class
+*.log
+
+/build
+/.gradle
+/out
+
+# Ignorar configurações do IntelliJ
+/.idea
