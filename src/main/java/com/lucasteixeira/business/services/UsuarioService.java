@@ -1,10 +1,10 @@
 package com.lucasteixeira.business.services;
 
 
-import com.lucasteixeira.business.mappers.UsuarioMapper;
 import com.lucasteixeira.business.dto.EnderecoDTO;
 import com.lucasteixeira.business.dto.TelefoneDTO;
 import com.lucasteixeira.business.dto.UsuarioDTO;
+import com.lucasteixeira.business.mappers.UsuarioMapper;
 import com.lucasteixeira.infrastructure.entity.Endereco;
 import com.lucasteixeira.infrastructure.entity.Telefone;
 import com.lucasteixeira.infrastructure.entity.Usuario;
@@ -28,6 +28,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +43,7 @@ public class UsuarioService {
     private final AuthenticationManager authenticationManager;
     private final UserProducer userProducer;
 
-
+    @Transactional
     public UsuarioDTO salvaUsuario(UsuarioDTO usuarioDTO){
         emailExiste(usuarioDTO.getEmail());
         usuarioDTO.setSenha(passwordEncoder.encode(usuarioDTO.getSenha()));
