@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   app:
-    build: Usuario
+    build: .
     ports:
       - "8081:8081"
     environment:
